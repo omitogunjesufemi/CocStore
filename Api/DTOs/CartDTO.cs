@@ -9,6 +9,6 @@
 
     public class CUCartDTO
     {
-        public List<CartItemDTO> CartItems { get; set; }
+        public List<CUCartItemDTO> CartItems { get; set; }
     }
 }

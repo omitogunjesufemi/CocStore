@@ -7,6 +7,7 @@
         ProductNotFound,
         CategoryNotFound,
         OrderNotFound,
+        CartNotFound,
         InvalidProduct,
         InvalidCategory
     }
