@@ -1,4 +1,5 @@
 ﻿using Api.Models;
+using Api.Services.Results;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -12,14 +13,19 @@ namespace Api.DTOs
         public DateTime OrderDate { get; set; }
 
         [Required(ErrorMessage = "Order Amount is required.")]
-        [Range(0.00, 99999999.99, ErrorMessage = "Unit Price must be between 0.00 and 99,999,999.99.")]
         public decimal OrderAmount { get; set; }
+
+        [Required(ErrorMessage = "Status is required.")]
+        public OrderStatus? Status { get; set; }
 
         public List<OrderItemDTO> OrderItems { get; set; }
     }
 
     public class CUOrderDTO
     {
+        [Required(ErrorMessage = "Status is required.")]
+        [EnumDataType(typeof(OrderStatus), ErrorMessage = "Invalid order status.")]
+        public OrderStatus? Status { get; set; }
         public List<CUOrderItemDTO> OrderItems { get; set; }
     }
 }

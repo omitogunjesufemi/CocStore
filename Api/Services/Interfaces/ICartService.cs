@@ -10,5 +10,7 @@ namespace Api.Services.Interfaces
         Task<IEnumerable<Cart>> GetCarts();
         Task<Cart?> CreateCart(CUCartDTO cartDTO);
         Task<StatusRecord> AddCartItemItemToCart(Guid cartId, CUCartItemDTO cartItemDTO);
+        Task<StatusRecord> RemoveItemFromCart(Guid cartId, Guid productId);
+        Task<StatusRecord> DeleteCart(Guid cartId);
     }
 }

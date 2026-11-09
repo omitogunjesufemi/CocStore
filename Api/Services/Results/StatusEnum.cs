@@ -9,6 +9,7 @@
         OrderNotFound,
         CartNotFound,
         InvalidProduct,
-        InvalidCategory
+        InvalidCategory,
+        FailedDBTransaction
     }
 }

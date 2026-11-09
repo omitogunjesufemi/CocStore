@@ -44,11 +44,32 @@ namespace Api.Services
                     ProductId = cartItemDTO.ProductId,
                     Quantity = cartItemDTO.Quantity,
                 };
-                cart.CartItems.Add(cartItem);
+                //cart.CartItems.Add(cartItem);
+                await _cartRepository.AddCartItem(cart, cartItem);
             }
             _cartRepository.Update(cart);
             await _cartRepository.SaveAsync();
             return new StatusRecord(StatusEnum.Updated, "Item has been added to cart.");
+        }
+
+        public async Task<StatusRecord> RemoveItemFromCart(Guid cartId, Guid productId)
+        {
+            var cart = await _cartRepository.GetCartWithCartItemsWT(cartId);
+            if (cart == null)
+                return new StatusRecord(StatusEnum.CartNotFound, "Cart Not Found.");
+
+            var product = await _productRepository.GetProductWithNoTracking(productId);
+            if (product == null)
+                return new StatusRecord(StatusEnum.InvalidProduct, "Product not found.");
+
+            foreach (var item in cart.CartItems)
+            {
+                if (item.ProductId == productId)
+                    cart.CartItems.Remove(item);
+            }
+            _cartRepository.Update(cart);
+            await _cartRepository.SaveAsync();
+            return new StatusRecord(StatusEnum.Updated, "Item has been deleted from cart.");
         }
 
         public async Task<Cart?> CreateCart(CUCartDTO cartDTO)
@@ -84,6 +105,16 @@ namespace Api.Services
         public async Task<IEnumerable<Cart>> GetCarts()
         {
             return await _cartRepository.GetCartsWithCartItemsWNT();
+        }
+
+        public async Task<StatusRecord> DeleteCart(Guid cartId)
+        {
+            var cart = await _cartRepository.GetCartWithCartItemsWT(cartId);
+            if (cart == null)
+                return new StatusRecord(StatusEnum.CartNotFound, "Cart Not Found.");
+
+            _cartRepository.Delete(cart);
+            return new StatusRecord(StatusEnum.Deleted, "Cart has been deleted.");
         }
     }
 }

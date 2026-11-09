@@ -12,6 +12,12 @@ namespace Api.Repositories.Implementation
             _dbContext = dbContext;
         }
 
+        public async Task AddCartItem(Cart cart, CartItem cartItem)
+        {
+            cart.CartItems.Add(cartItem);
+            _dbContext.Entry(cartItem).State = EntityState.Added;
+        }
+
         public async Task<IEnumerable<Cart>> GetCartsWithCartItemsWNT()
         {
             return await _dbContext.Set<Cart>().AsNoTracking().Include(c => c.CartItems).ThenInclude(ci => ci.Product).ToListAsync();
@@ -19,12 +25,12 @@ namespace Api.Repositories.Implementation
 
         public async Task<Cart?> GetCartWithCartItemsWNT(Guid cartId)
         {
-            return await _dbContext.Set<Cart>().Include(c => c.CartItems).ThenInclude(ci => ci.Product).FirstOrDefaultAsync(c => c.Id == cartId);
+            return await _dbContext.Set<Cart>().AsNoTracking().Include(c => c.CartItems).ThenInclude(ci => ci.Product).FirstOrDefaultAsync(c => c.Id == cartId);
         }
 
-        public Task<Cart?> GetCartWithCartItemsWT(Guid cartId)
+        public async Task<Cart?> GetCartWithCartItemsWT(Guid cartId)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Set<Cart>().Include(c => c.CartItems).ThenInclude(ci => ci.Product).FirstOrDefaultAsync(c => c.Id == cartId);
         }
     }
 }

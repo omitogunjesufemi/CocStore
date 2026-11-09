@@ -1,4 +1,5 @@
 ﻿using Api.DTOs;
+using Api.Models;
 using Api.Services;
 using Api.Services.Interfaces;
 using Api.Services.Results;
@@ -90,7 +91,7 @@ namespace Api.Controllers
             return Ok(dto);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}/additem")]
         public async Task<IActionResult> AddItemToCart(Guid id, CUCartItemDTO cartItemDTO)
         {
             if (!ModelState.IsValid)
@@ -104,6 +105,35 @@ namespace Api.Controllers
                 return BadRequest(result.Message);
 
             if (result.Status == StatusEnum.Updated)
+                return NoContent();
+
+            throw new InvalidOperationException("Internal Server Error");
+        }
+
+        [HttpPut("{cartId}/removeitem/{productId}")]
+        public async Task<IActionResult> RemoveItemFromCart(Guid cartId, Guid productId)
+        {
+            var result = await _cartService.RemoveItemFromCart(cartId, productId);
+            if (result.Status == StatusEnum.CartNotFound)
+                return NotFound(result.Message);
+
+            if (result.Status == StatusEnum.InvalidProduct)
+                return BadRequest(result.Message);
+
+            if (result.Status == StatusEnum.Updated)
+                return NoContent();
+
+            throw new InvalidOperationException("Internal Server Error");
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCart(Guid id)
+        {
+            var result = await _cartService.DeleteCart(id);
+            if (result.Status == StatusEnum.CartNotFound)
+                return NotFound(result.Message);
+
+            if (result.Status == StatusEnum.Deleted)
                 return NoContent();
 
             throw new InvalidOperationException("Internal Server Error");

@@ -25,7 +25,7 @@ namespace Api.Controllers
 
             var order = await _orderService.CreateOrder(orderDTO);
             if (order == null)
-                return BadRequest("Invalid product Id.");
+                return BadRequest("Invalid product Id or order failed to be completed.");
             var dto = new OrderDTO
             {
                 Id = order.Id,

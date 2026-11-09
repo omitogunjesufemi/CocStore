@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Api.Services.Results;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Models
@@ -15,6 +16,10 @@ namespace Api.Models
         [Range(0.00, 99999999.99, ErrorMessage = "Unit Price must be between 0.00 and 99,999,999.99.")]
         [Column(TypeName = "decimal(12,2)")]
         public decimal OrderAmount { get; set; }
+
+        [Required(ErrorMessage = "Status is required.")]
+        [EnumDataType(typeof(OrderStatus), ErrorMessage = "Invalid order status.")]
+        public OrderStatus Status { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; }
     }
 }
