@@ -39,6 +39,7 @@ namespace Api.Controllers
                 CategoryId = product.CategoryId,
                 CategoryName = product.Category?.Name,
                 Price = product.Price,
+                Quantity = product.Quantity,
             };
             return Ok(dto);
         }
@@ -54,7 +55,8 @@ namespace Api.Controllers
                 Description = p.Description,
                 Price = p.Price,
                 CategoryId = p.CategoryId,
-                CategoryName = p.Category?.Name
+                CategoryName = p.Category?.Name,
+                Quantity = p.Quantity,
             });
             return Ok(dtos);
         }
@@ -73,7 +75,8 @@ namespace Api.Controllers
                 Description = product.Description,
                 Price = product.Price,
                 CategoryId = product.CategoryId,
-                CategoryName = product.Category?.Name
+                CategoryName = product.Category?.Name,
+                Quantity = product.Quantity
             };
             return Ok(dto);
         }

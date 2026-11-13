@@ -25,6 +25,11 @@ namespace Api.Repositories.Implementation
             _dbContext.SaveChangesAsync();
         }
 
+        public void DeleteWithNoSaveAsync(T entity)
+        {
+            _dbSet.Remove(entity);
+        }
+
         public async Task<bool> ExistAsync(Guid id)
         {
             return await _dbSet.AnyAsync(entity => EF.Property<Guid>(entity, "Id") == id);

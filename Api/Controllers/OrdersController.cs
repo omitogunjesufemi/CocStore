@@ -1,4 +1,5 @@
 ﻿using Api.DTOs;
+using Api.Models;
 using Api.Services.Interfaces;
 using Api.Services.Results;
 using Microsoft.AspNetCore.Http;
@@ -41,6 +42,37 @@ namespace Api.Controllers
             return Ok(dto);
         }
 
+        [HttpPost("Checkout/{cartId}")]
+        public async Task<IActionResult> Checkout(Guid cartId)
+        {
+            var result = await _orderService.CheckoutAsync(cartId);
+            if (result.status == StatusEnum.CartNotFound)
+                return NotFound("The cart is empty");
+            
+            if (result.status == StatusEnum.FailedDBTransaction)
+                return BadRequest("Order could not be proceed. Please try again.");
+            
+            if (result.status == StatusEnum.CheckedOut)
+            {
+                var dto = new OrderDTO
+                {
+                    Id = result.order.Id,
+                    OrderAmount = result.order.OrderAmount,
+                    OrderDate = result.order.OrderDate,
+                    OrderItems = result.order.OrderItems.Select(oi => new OrderItemDTO
+                    {
+                        ProductId = oi.ProductId,
+                        ProductName = oi.Product.Name,
+                        Quantity = oi.Quantity,
+                        UnitPrice = oi.UnitPrice,
+                    }).ToList()
+                };
+                return Ok(dto);
+            }
+
+            throw new InvalidOperationException("Internal Server Error");
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetOrders()
         {
@@ -50,6 +82,7 @@ namespace Api.Controllers
                 Id = o.Id,
                 OrderAmount = o.OrderAmount,
                 OrderDate = o.OrderDate,
+                Status = o.Status,
                 OrderItems = o.OrderItems?.Select(oi => new OrderItemDTO
                 {
                     Id = oi.Id,
@@ -75,6 +108,7 @@ namespace Api.Controllers
                 Id = order.Id,
                 OrderAmount = order.OrderAmount,
                 OrderDate = order.OrderDate,
+                Status = order.Status,
                 OrderItems = order.OrderItems?.Select(oi => new OrderItemDTO
                 {
                     Id = oi.Id,

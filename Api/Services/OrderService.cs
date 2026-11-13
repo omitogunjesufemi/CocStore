@@ -29,7 +29,7 @@ namespace Api.Services
 
                 foreach (var itemDTO in orderDTO.OrderItems)
                 {
-                    var product = await _unitOfWork.Products.GetProductWithCategoryAsync(itemDTO.ProductId);
+                    var product = await _unitOfWork.Products.GetByIdAsync(itemDTO.ProductId);
                     if (product == null)
                         return null;
 
@@ -40,6 +40,7 @@ namespace Api.Services
                         UnitPrice = product.Price,
                     };
                     order.OrderItems.Add(orderItem);
+                    product.Quantity = product.Quantity - orderItem.Quantity;
                 }
                 order.OrderAmount = order.OrderItems.Sum(or => or.Quantity * or.UnitPrice);
                 await _unitOfWork.Orders.AddAsync(order);
@@ -52,6 +53,27 @@ namespace Api.Services
                 return null;
             }
             
+        }
+
+        public async Task<OrderRecord> CheckoutAsync(Guid cartId)
+        {
+            var cart = await _unitOfWork.Carts.GetCartWithCartItemsWT(cartId);
+            if (cart == null)
+                return new OrderRecord(StatusEnum.CartNotFound, null, "The cart is empty");
+            var orderDTO = new CUOrderDTO
+            {
+                Status = OrderStatus.Pending,
+                OrderItems = cart.CartItems.Select(ci => new CUOrderItemDTO
+                {
+                    ProductId = ci.ProductId,
+                    Quantity = ci.Quantity,
+                }).ToList()
+            };
+            var order = await CreateOrder(orderDTO);
+            if (order == null)
+                return new OrderRecord(StatusEnum.FailedDBTransaction, null, "Order could not be proceed. Try again.");
+            _unitOfWork.Carts.Delete(cart);
+            return new OrderRecord(StatusEnum.CheckedOut, order, "Order was successful.");
         }
 
         public async Task<Order?> GetOrderById(Guid id)
@@ -84,7 +106,7 @@ namespace Api.Services
 
                 foreach (var item in orderDTO.OrderItems)
                 {
-                    var product = await _unitOfWork.Products.GetProductWithNoTracking(item.ProductId);
+                    var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
                     if (product == null)
                         return new StatusRecord(StatusEnum.InvalidProduct, "Product not found.");
                     unitPrice = product.Price;
@@ -111,12 +133,30 @@ namespace Api.Services
 
         public async Task<StatusRecord> DeleteOrder(Guid orderId)
         {
-            var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
-            if (order == null)
-                return new StatusRecord(StatusEnum.OrderNotFound, "Order not found.");
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var order = await _unitOfWork.Orders.GetOrderWithOrderItemsWT(orderId);
+                if (order == null)
+                    return new StatusRecord(StatusEnum.OrderNotFound, "Order not found.");
 
-            _unitOfWork.Orders.Delete(order);
-            return new StatusRecord(StatusEnum.Deleted, "Order has been deleted.");
+                foreach (var item in order.OrderItems)
+                {
+                    var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
+                    if (product == null)
+                        return new StatusRecord(StatusEnum.InvalidProduct, "Product not found.");
+                    product.Quantity = product.Quantity + item.Quantity;
+                }
+                _unitOfWork.Orders.DeleteWithNoSaveAsync(order);
+                await _unitOfWork.CommitAsync();
+                return new StatusRecord(StatusEnum.Deleted, "Order has been deleted.");
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync();
+                return new StatusRecord(StatusEnum.FailedDBTransaction, "Order cannot be deleted. Try again.");
+            }
+            
         }
 
         public async Task<StatusRecord> AddOrderItem(Guid orderId, CUOrderItemDTO orderItemDTO)

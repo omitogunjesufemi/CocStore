@@ -81,6 +81,7 @@ namespace Api.Services
             product.Description = updateDTO.Description;
             product.CategoryId = updateDTO.CategoryId;
             product.Price = updateDTO.Price;
+            product.Quantity = updateDTO.Quantity;
             _productRepository.Update(product);
             await _productRepository.SaveAsync();
             return new StatusRecord(StatusEnum.Updated, "Product updated successfully.");

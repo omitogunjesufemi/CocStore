@@ -5,6 +5,7 @@ using Api.Repositories.Implementation;
 using Api.Services;
 using Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 namespace Api
 {

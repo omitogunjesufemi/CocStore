@@ -19,6 +19,10 @@ namespace Api.DTOs
         [Column(TypeName = "decimal(12,2)")]
         public decimal Price { get; set; }
 
+        [Required(ErrorMessage = "Quantity is required.")]
+        [Range(1, 10000, ErrorMessage = "Quantity must be atleast 1.")]
+        public int Quantity { get; set; }
+
         [Required(ErrorMessage = "CategoryId is required.")]
         public Guid CategoryId { get; set; }
         public string? CategoryName { get; set; }
@@ -37,6 +41,10 @@ namespace Api.DTOs
         [Range(0.01, 999999.99, ErrorMessage = "Price must be between 0.01 and 999,999.99")]
         [Column(TypeName = "decimal(12,2)")]
         public decimal Price { get; set; }
+
+        [Required(ErrorMessage = "Quantity is required.")]
+        [Range(1, 10000, ErrorMessage = "Quantity must be atleast 1.")]
+        public int Quantity { get; set; }
 
         [Required(ErrorMessage = "CategoryId is required.")]
         public Guid CategoryId { get; set; }

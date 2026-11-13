@@ -10,6 +10,7 @@
         CartNotFound,
         InvalidProduct,
         InvalidCategory,
-        FailedDBTransaction
+        FailedDBTransaction,
+        CheckedOut,
     }
 }

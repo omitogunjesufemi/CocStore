@@ -11,6 +11,7 @@ namespace Api.Services.Interfaces
         Task<IEnumerable<Order>> GetOrders();
         Task<IEnumerable<Order>> GetOrdersWithItems();
         Task<Order?> CreateOrder(CUOrderDTO orderDTO);
+        Task<OrderRecord> CheckoutAsync(Guid cartId);
         Task<StatusRecord> AddOrderItem(Guid orderId, CUOrderItemDTO orderItemDTO);
         Task<StatusRecord> UpdateOrder(Guid orderId, CUOrderDTO orderDTO);
         Task<StatusRecord> DeleteOrder(Guid orderId);

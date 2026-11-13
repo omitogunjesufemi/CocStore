@@ -21,6 +21,10 @@ namespace Api.Models
         [Column(TypeName = "decimal(12,2)")]
         public decimal Price { get; set; }
 
+        [Required(ErrorMessage = "Quantity is required.")]
+        [Range(1, 10000, ErrorMessage = "Quantity must be atleast 1.")]
+        public int Quantity { get; set; }
+
         [ForeignKey(nameof(Category))]
         [Required(ErrorMessage = "CategoryId is required.")]
         public Guid CategoryId { get; set; }
