@@ -7,10 +7,13 @@
         ProductNotFound,
         CategoryNotFound,
         OrderNotFound,
+        UserNotFound,
+        UserAlreadyExists,
         CartNotFound,
         InvalidProduct,
         InvalidCategory,
         FailedDBTransaction,
         CheckedOut,
+        RegistrationComplete
     }
 }

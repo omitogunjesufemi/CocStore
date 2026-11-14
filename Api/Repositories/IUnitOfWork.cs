@@ -9,6 +9,10 @@ namespace Api.Repositories
         IOrderRepository Orders { get; }
         IRepository<Category> Categories {  get; }
         ICartRepository Carts { get; }
+        IUserRepository Users { get; }
+        IRepository<Role> Roles { get; }
+        IRepository<RefreshToken> RefreshTokens { get; }
+
 
         int SaveChanges();
         Task<int> SaveChangesAsync();

@@ -13,6 +13,9 @@ namespace Api.Repositories.Implementation
         public IOrderRepository Orders { get; }
         public IRepository<Category> Categories { get; }
         public ICartRepository Carts { get; }
+        public IUserRepository Users { get; }
+        public IRepository<Role> Roles { get; }
+        public IRepository<RefreshToken> RefreshTokens { get; }
 
 
         public UnitOfWork(ApiDbContext apiDbContext)
@@ -22,6 +25,9 @@ namespace Api.Repositories.Implementation
             Orders = new OrderRepository(_apiDbContext);
             Categories = new GenericRepository<Category>(_apiDbContext);
             Carts = new CartRepository(_apiDbContext);
+            Users = new UserRepository(_apiDbContext);
+            Roles = new GenericRepository<Role>(_apiDbContext);
+            RefreshTokens = new GenericRepository<RefreshToken>(_apiDbContext);
         }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()
