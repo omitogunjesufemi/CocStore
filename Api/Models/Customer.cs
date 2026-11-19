@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Models
 {
@@ -15,12 +16,20 @@ namespace Api.Models
         [StringLength(200, ErrorMessage = "Customer Last Name cannot exceed 200 characters.")]
         public string LastName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid email address format.")]
-        public string Email { get; set; } = string.Empty;
-
         [Required(ErrorMessage = "Country Code is required.")]
-        public string CountryCode { get; set; }
+        public string CountryCode { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Phone Number is required.")]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        [ForeignKey(nameof(ShippingAddress))]
+        public Guid? ShippingAddressId { get; set; }
+        public Address? ShippingAddress { get; set; }
+
+        [ForeignKey(nameof(User))]
+        [Required(ErrorMessage = "User Id is required.")]
+        public Guid UserId { get; set; }
+        public User User { get; set; }
 
         public ICollection<Order>? Orders { get; set; }
     }

@@ -27,7 +27,7 @@ namespace Api.Services
             if (user == null)
                 return null;
 
-            if (BCrypt.Net.BCrypt.Verify(loginDTO.Password, user.PasswordHash))
+            if (!BCrypt.Net.BCrypt.Verify(loginDTO.Password, user.PasswordHash))
                 return null;
 
             var roles = user.Roles.Select(ur => ur.Name).ToList();
@@ -48,9 +48,32 @@ namespace Api.Services
             return responseDTO;
         }
 
-        public Task<AuthResponseDTO> RefreshTokenAsync(string refreshToken)
+        public async Task<AuthResponseDTO?> RefreshTokenAsync(string refreshToken)
         {
-            throw new NotImplementedException();
+            var existingToken = await _unitOfWork.Users.GetRefreshToken(refreshToken);
+
+            if (existingToken == null ||  existingToken.IsRevoked || existingToken.Expires <= DateTime.UtcNow)
+                return null;
+
+            existingToken.IsRevoked = true;
+            existingToken.RevokedAt = DateTime.UtcNow;
+
+            var user = existingToken.User;
+            var roles = user.Roles.Select(r => r.Name).ToList();
+            var accessToken = _tokenService.GenerateAccessToken(user, roles, out string jwtId);
+            var newRefreshToken = _tokenService.GenerateRefreshToken(jwtId, user.Id);
+            await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken);
+            await _unitOfWork.SaveChangesAsync();
+
+            var accessTokenExpiryMinutes = int.TryParse(_configuration["JwtSettings:AcessTokenExpirationMinutes"], out var val) ? val : 15;
+
+            var responseDTO = new AuthResponseDTO
+            {
+                AccessToken = accessToken,
+                RefreshToken = newRefreshToken.Token,
+                AccessTokenExpiresAt = DateTime.UtcNow.AddMinutes(accessTokenExpiryMinutes)
+            };
+            return responseDTO;
         }
 
         public async Task<StatusRecord> RegisterUserAsync(UserRegisterDTO registerDTO)
@@ -61,8 +84,6 @@ namespace Api.Services
 
             var user = new User
             {
-                FirstName = registerDTO.FirstName,
-                LastName = registerDTO.LastName,
                 Email = registerDTO.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDTO.Password),
                 IsActive = true
@@ -77,14 +98,25 @@ namespace Api.Services
             return new StatusRecord(StatusEnum.RegistrationComplete, "Registration was successful.");
         }
 
-        public Task<bool> RevokeRefreshTokenAsync(string refreshToken)
+        public async Task<bool> RevokeRefreshTokenAsync(string refreshToken)
         {
-            throw new NotImplementedException();
+            var existingToken = await _unitOfWork.Users.GetRefreshToken(refreshToken);
+
+            if (existingToken == null || existingToken.IsRevoked)
+                return false;
+
+            existingToken.IsRevoked = true;
+            existingToken.RevokedAt = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangesAsync();
+            return true;
         }
 
         public async Task<User?> GetUserByEmail(string email)
         {
             return await _unitOfWork.Users.GetUserByEmail(email);
         }
+
+
     }
 }

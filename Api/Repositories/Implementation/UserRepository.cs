@@ -17,10 +17,21 @@ namespace Api.Repositories.Implementation
             return await _dbContext.Set<User>().AnyAsync(u => u.Email == email);
         }
 
-        public async Task<Role> GetRoleAsync(string roleName)
+        public async Task<Role?> GetRoleAsync(string roleName)
         {
-            return await _dbContext.Set<Role>().AsNoTracking().FirstOrDefaultAsync(r => r.Name == roleName);
+            return await _dbContext.Set<Role>().FirstOrDefaultAsync(r => r.Name == roleName);
         }
+
+        public async Task<RefreshToken?> GetRefreshToken(string refreshToken)
+        {
+            return await _dbContext.Set<RefreshToken>().Include(rt => rt.User).ThenInclude(u => u.Roles).FirstOrDefaultAsync(rt => rt.Token == refreshToken);
+        }
+
+        public async Task<RefreshToken?> GetRefreshTokenWithJWTID(string jwtId)
+        {
+            return await _dbContext.Set<RefreshToken>().FirstOrDefaultAsync(rt => rt.JwtId == jwtId);
+        }
+
 
         public async Task<User> GetUserByEmail(string email)
         {

@@ -22,6 +22,37 @@ namespace Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Api.Models.Address", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StreetAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Address");
+                });
+
             modelBuilder.Entity("Api.Models.Cart", b =>
                 {
                     b.Property<Guid>("Id")
@@ -77,10 +108,53 @@ namespace Api.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Api.Models.Customer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CountryCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ShippingAddressId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ShippingAddressId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Customers");
+                });
+
             modelBuilder.Entity("Api.Models.Order", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("OrderAmount")
@@ -93,6 +167,8 @@ namespace Api.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
 
                     b.ToTable("Orders");
                 });
@@ -221,13 +297,13 @@ namespace Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("97abc384-e98b-4b03-83eb-6afd11501f7c"),
+                            Id = new Guid("441b8bbe-ccaa-4f68-bb46-dc2182ed34d8"),
                             Description = "Administrator role",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = new Guid("441b8bbe-ccaa-4f68-bb46-dc2182ed34d8"),
+                            Id = new Guid("97abc384-e98b-4b03-83eb-6afd11501f7c"),
                             Description = "Worker Role",
                             Name = "Worker"
                         });
@@ -243,18 +319,8 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -297,6 +363,30 @@ namespace Api.Migrations
                     b.Navigation("Cart");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Api.Models.Customer", b =>
+                {
+                    b.HasOne("Api.Models.Address", "ShippingAddress")
+                        .WithMany()
+                        .HasForeignKey("ShippingAddressId");
+
+                    b.HasOne("Api.Models.User", "User")
+                        .WithOne("Customer")
+                        .HasForeignKey("Api.Models.Customer", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ShippingAddress");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Api.Models.Order", b =>
+                {
+                    b.HasOne("Api.Models.Customer", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("CustomerId");
                 });
 
             modelBuilder.Entity("Api.Models.OrderItem", b =>
@@ -365,6 +455,11 @@ namespace Api.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("Api.Models.Customer", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("Api.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
@@ -372,6 +467,9 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Models.User", b =>
                 {
+                    b.Navigation("Customer")
+                        .IsRequired();
+
                     b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618

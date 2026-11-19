@@ -8,6 +8,7 @@
         CategoryNotFound,
         OrderNotFound,
         UserNotFound,
+        CustomerNotFound,
         UserAlreadyExists,
         CartNotFound,
         InvalidProduct,

@@ -19,7 +19,6 @@ namespace Api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddDbContext<ApiDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("ApiDbConnection"));
@@ -35,6 +34,7 @@ namespace Api
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<ICartRepository, CartRepository>();
+            builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -43,6 +43,7 @@ namespace Api
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
 
@@ -58,7 +59,17 @@ namespace Api
                         ValidateAudience = false,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secretkey"] ?? "jwtSecret"))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secretkey"] ?? throw new InvalidOperationException("JwtSettings:Secretkey is missing from configuration.")))
+                    };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            if (context.Request.Cookies.ContainsKey("accessToken"))
+                                context.Token = context.Request.Cookies["accessToken"];
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 
@@ -79,6 +90,7 @@ namespace Api
             app.UseExceptionHandler();
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

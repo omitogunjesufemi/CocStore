@@ -6,7 +6,9 @@ namespace Api.Repositories
     {
         Task<bool> EmailExistsAsync(string email);
 
-        Task<Role> GetRoleAsync(string roleName);
+        Task<Role?> GetRoleAsync(string roleName);
+        Task<RefreshToken?> GetRefreshToken(string refreshToken);
+        Task<RefreshToken?> GetRefreshTokenWithJWTID(string jwtId);
 
         Task<User> GetUserByEmail(string email);
     }

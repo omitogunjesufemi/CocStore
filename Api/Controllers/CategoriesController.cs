@@ -2,6 +2,7 @@
 using Api.Models;
 using Api.Services.Interfaces;
 using Api.Services.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,6 +36,7 @@ namespace Api.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetCategories()
         {
             var categories = await _categoryService.GetCategories();
