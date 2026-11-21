@@ -10,6 +10,7 @@ namespace Api.Repositories
         IRepository<Category> Categories {  get; }
         ICartRepository Carts { get; }
         IUserRepository Users { get; }
+        ICustomerRepository Customers { get; }
         IRepository<Role> Roles { get; }
         IRepository<RefreshToken> RefreshTokens { get; }
 

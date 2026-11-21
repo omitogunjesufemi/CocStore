@@ -59,7 +59,12 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
 
                     b.ToTable("Carts");
                 });
@@ -154,7 +159,7 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CustomerId")
+                    b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("OrderAmount")
@@ -346,6 +351,17 @@ namespace Api.Migrations
                     b.ToTable("RoleUser");
                 });
 
+            modelBuilder.Entity("Api.Models.Cart", b =>
+                {
+                    b.HasOne("Api.Models.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
             modelBuilder.Entity("Api.Models.CartItem", b =>
                 {
                     b.HasOne("Api.Models.Cart", "Cart")
@@ -384,9 +400,13 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Models.Order", b =>
                 {
-                    b.HasOne("Api.Models.Customer", null)
+                    b.HasOne("Api.Models.Customer", "Customer")
                         .WithMany("Orders")
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("Api.Models.OrderItem", b =>

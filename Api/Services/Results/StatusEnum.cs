@@ -9,6 +9,7 @@
         OrderNotFound,
         UserNotFound,
         CustomerNotFound,
+        CustomerMisMatch,
         UserAlreadyExists,
         CartNotFound,
         InvalidProduct,

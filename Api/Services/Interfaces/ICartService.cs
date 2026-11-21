@@ -8,7 +8,7 @@ namespace Api.Services.Interfaces
     {
         Task<Cart?> GetCart(Guid cartId);
         Task<IEnumerable<Cart>> GetCarts();
-        Task<Cart?> CreateCart(CUCartDTO cartDTO);
+        Task<Cart?> CreateCart(CUCartDTO cartDTO, string customerEmail);
         Task<StatusRecord> AddCartItemItemToCart(Guid cartId, CUCartItemDTO cartItemDTO);
         Task<StatusRecord> RemoveItemFromCart(Guid cartId, Guid productId);
         Task<StatusRecord> DeleteCart(Guid cartId);

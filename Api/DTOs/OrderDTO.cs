@@ -8,6 +8,7 @@ namespace Api.DTOs
     public class OrderDTO
     {
         public Guid Id { get; set; }
+        public Guid CustomerId { get; set; }
 
         [Required(ErrorMessage = "Order Date is required.")]
         public DateTime OrderDate { get; set; }
@@ -27,5 +28,6 @@ namespace Api.DTOs
         [EnumDataType(typeof(OrderStatus), ErrorMessage = "Invalid order status.")]
         public OrderStatus? Status { get; set; }
         public List<CUOrderItemDTO> OrderItems { get; set; }
+        public Guid CustomerId { get; set; }
     }
 }

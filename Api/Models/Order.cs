@@ -9,6 +9,11 @@ namespace Api.Models
         [Key]
         public Guid Id { get; set; }
 
+        [ForeignKey(nameof(Customer))]
+        [Required(ErrorMessage = "Custoemr Id is required.")]
+        public Guid CustomerId { get; set; }
+        public Customer Customer { get; set; }
+
         [Required(ErrorMessage = "Order Date is required.")]
         public DateTime OrderDate {  get; set; }
 

@@ -22,5 +22,10 @@ namespace Api.Repositories.Implementation
         {
             return await _apiDbContext.Set<Customer>().AsNoTracking().Include(c => c.User).Include(c => c.ShippingAddress).ToListAsync();
         }
+
+        public async Task<Customer?> GetCustomerDetailsByEmail(string email)
+        {
+            return await _apiDbContext.Set<Customer>().AsNoTracking().Include(c => c.User).Include(c => c.ShippingAddress).FirstOrDefaultAsync(c => c.User.Email == email);
+        }
     }
 }

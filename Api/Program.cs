@@ -74,7 +74,7 @@ namespace Api
                 });
 
             builder.Services.AddProblemDetails();
-
+            //builder.Services.AddHttpContextAccessor();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 

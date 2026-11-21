@@ -23,6 +23,7 @@ namespace Api.Services
                 var order = new Order
                 {
                     OrderAmount = 0,
+                    CustomerId = orderDTO.CustomerId,                               
                     OrderDate = DateTime.UtcNow,
                     OrderItems = new List<OrderItem>()
                 };
@@ -52,16 +53,24 @@ namespace Api.Services
                 await _unitOfWork.RollbackAsync();
                 return null;
             }
-            
         }
 
-        public async Task<OrderRecord> CheckoutAsync(Guid cartId)
+        public async Task<OrderRecord> CheckoutAsync(Guid cartId, string customerEmail)
         {
             var cart = await _unitOfWork.Carts.GetCartWithCartItemsWT(cartId);
             if (cart == null)
                 return new OrderRecord(StatusEnum.CartNotFound, null, "The cart is empty");
+
+            var customer = await _unitOfWork.Customers.GetCustomerDetailsByEmail(customerEmail);
+            if (customer == null)
+                return new OrderRecord(StatusEnum.CustomerNotFound, null, "Login to check out.");
+
+            if (cart.CustomerId != customer.Id)
+                return new OrderRecord(StatusEnum.CustomerMisMatch, null, "Wrong cart, kindly try with the cart for the customer.");
+
             var orderDTO = new CUOrderDTO
             {
+                CustomerId = customer.Id,
                 Status = OrderStatus.Pending,
                 OrderItems = cart.CartItems.Select(ci => new CUOrderItemDTO
                 {

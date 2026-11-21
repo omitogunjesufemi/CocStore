@@ -5,6 +5,7 @@ using Api.Services.Interfaces;
 using Api.Services.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -25,7 +26,11 @@ namespace Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var cartCreated = await _cartService.CreateCart(cartDTO);
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (userEmail == null)
+                return Unauthorized("Kindly login to add item to cart.");
+
+            var cartCreated = await _cartService.CreateCart(cartDTO, userEmail);
             if (cartCreated == null)
                 return BadRequest("Invalid Product.");
 
@@ -33,19 +38,7 @@ namespace Api.Controllers
             if (cart == null)
                 return BadRequest("Invalid Product.");
 
-            var dto = new CartDTO
-            {
-                Id = cart.Id,
-                TotalAmount = cart.CartItems.Sum(i => i.Quantity * (i.Product?.Price ?? 0)),
-                CartItems = cart.CartItems.Select(c => new CartItemDTO
-                {
-                    Id = c.Id,
-                    ProductId = c.ProductId,
-                    ProductName = c.Product.Name,
-                    Quantity = c.Quantity,
-                    UnitPrice = c.Product?.Price ?? 0
-                }).ToList(),
-            };
+            var dto = DTOConverter(cart);
             return Ok(dto);
         }
 
@@ -53,19 +46,7 @@ namespace Api.Controllers
         public async Task<IActionResult> GetCarts()
         {
             var carts = await _cartService.GetCarts();
-            var dtos = carts?.Select(c => new CartDTO
-            {
-                Id = c.Id,
-                TotalAmount = c.CartItems.Sum(i => i.Quantity * i.Product.Price),
-                CartItems = c.CartItems.Select(ci => new CartItemDTO
-                {
-                    Id = ci.Id,
-                    ProductId = ci.ProductId,
-                    ProductName = ci.Product.Name,
-                    Quantity = ci.Quantity,
-                    UnitPrice = ci.Product.Price
-                }).ToList()
-            });
+            var dtos = carts?.Select(c => DTOConverter(c));
             return Ok(dtos);
         }
 
@@ -75,19 +56,9 @@ namespace Api.Controllers
             var cart = await _cartService.GetCart(id);
             if (cart == null)
                 return NotFound("Cart not found.");
-            var dto = new CartDTO
-            {
-                Id= cart.Id,
-                TotalAmount = cart.CartItems.Sum(i => i.Quantity * i.Product.Price),
-                CartItems = cart.CartItems.Select(ci => new CartItemDTO
-                {
-                    Id = ci.Id,
-                    ProductId = ci.ProductId,
-                    ProductName = ci.Product.Name,
-                    Quantity = ci.Quantity,
-                    UnitPrice = ci.Product.Price
-                }).ToList()
-            };
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var dto = DTOConverter(cart);
             return Ok(dto);
         }
 
@@ -137,6 +108,24 @@ namespace Api.Controllers
                 return NoContent();
 
             throw new InvalidOperationException("Internal Server Error");
+        }
+
+        private CartDTO DTOConverter(Cart cart)
+        {
+            return new CartDTO
+            {
+                Id = cart.Id,
+                CustomerId = cart.CustomerId,
+                TotalAmount = cart.CartItems.Sum(i => i.Quantity * i.Product.Price),
+                CartItems = cart.CartItems.Select(ci => new CartItemDTO
+                {
+                    Id = ci.Id,
+                    ProductId = ci.ProductId,
+                    ProductName = ci.Product.Name,
+                    Quantity = ci.Quantity,
+                    UnitPrice = ci.Product.Price
+                }).ToList()
+            };
         }
     }
 }

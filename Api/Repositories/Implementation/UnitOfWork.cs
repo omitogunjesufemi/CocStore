@@ -14,6 +14,7 @@ namespace Api.Repositories.Implementation
         public IRepository<Category> Categories { get; }
         public ICartRepository Carts { get; }
         public IUserRepository Users { get; }
+        public ICustomerRepository Customers { get; }
         public IRepository<Role> Roles { get; }
         public IRepository<RefreshToken> RefreshTokens { get; }
 
@@ -26,6 +27,7 @@ namespace Api.Repositories.Implementation
             Categories = new GenericRepository<Category>(_apiDbContext);
             Carts = new CartRepository(_apiDbContext);
             Users = new UserRepository(_apiDbContext);
+            Customers = new CustomerRepository(_apiDbContext);
             Roles = new GenericRepository<Role>(_apiDbContext);
             RefreshTokens = new GenericRepository<RefreshToken>(_apiDbContext);
         }

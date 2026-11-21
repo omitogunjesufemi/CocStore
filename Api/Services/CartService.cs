@@ -10,11 +10,13 @@ namespace Api.Services
     {
         private readonly ICartRepository _cartRepository;
         private readonly IProductRepository _productRepository;
+        private readonly ICustomerRepository _customerRepository;
 
-        public CartService(ICartRepository cartRepository, IProductRepository productRepository)
+        public CartService(ICartRepository cartRepository, IProductRepository productRepository, ICustomerRepository customerRepository)
         {
             _cartRepository = cartRepository;
             _productRepository = productRepository;
+            _customerRepository = customerRepository;
         }
 
         public async Task<StatusRecord> AddCartItemItemToCart(Guid cartId, CUCartItemDTO cartItemDTO)
@@ -72,12 +74,16 @@ namespace Api.Services
             return new StatusRecord(StatusEnum.Updated, "Item has been deleted from cart.");
         }
 
-        public async Task<Cart?> CreateCart(CUCartDTO cartDTO)
+        public async Task<Cart?> CreateCart(CUCartDTO cartDTO, string customerEmail)
         {
             var cart = new Cart
             {
                 CartItems = new List<CartItem>()
             };
+
+            var customer = await _customerRepository.GetCustomerDetailsByEmail(customerEmail);
+            if (customer == null)
+                return null;
 
             foreach (var item in cartDTO.CartItems)
             {
@@ -92,6 +98,7 @@ namespace Api.Services
                 };
                 cart.CartItems.Add(cartItem);
             }
+            cart.CustomerId = customer.Id;
             await _cartRepository.AddAsync(cart);
             await _cartRepository.SaveAsync();
             return cart;

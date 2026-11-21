@@ -3,6 +3,7 @@
     public class CartDTO
     {
         public Guid Id { get; set; }
+        public Guid CustomerId { get; set; }
         public decimal TotalAmount { get; set; }
         public List<CartItemDTO> CartItems { get; set; }
     }

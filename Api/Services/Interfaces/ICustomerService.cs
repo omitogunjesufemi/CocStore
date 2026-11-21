@@ -11,7 +11,7 @@ namespace Api.Services.Interfaces
         Task<IEnumerable<Customer>> GetAllCustomers();
         Task<Customer?> GetCustomerByEmail(string email);
         Task<Customer?> CreateCustomer(CUCustomerDTO customerDTO);
-        Task<Customer?> UpdateCustomer(Guid customerId, CUCustomerDTO customerDTO);
+        Task<StatusRecord> UpdateCustomer(Guid customerId, CUCustomerDTO customerDTO);
         Task<bool> DeleteCustomer(Guid id);
         Task<StatusRecord> AddShippingAddressToCustomer(Guid customerId, AddressDTO addressDTO);
     }

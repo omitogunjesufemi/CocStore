@@ -4,6 +4,7 @@ using Api.Services.Interfaces;
 using Api.Services.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -27,6 +28,11 @@ namespace Api.Controllers
             var order = await _orderService.CreateOrder(orderDTO);
             if (order == null)
                 return BadRequest("Invalid product Id or order failed to be completed.");
+
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (userEmail == null)
+                return Unauthorized("Kindly login to proceed to complete order.");
+
             var dto = new OrderDTO
             {
                 Id = order.Id,
@@ -45,7 +51,11 @@ namespace Api.Controllers
         [HttpPost("Checkout/{cartId}")]
         public async Task<IActionResult> Checkout(Guid cartId)
         {
-            var result = await _orderService.CheckoutAsync(cartId);
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (userEmail == null)
+                return Unauthorized("Kindly login to proceed to complete order.");
+
+            var result = await _orderService.CheckoutAsync(cartId, userEmail);
             if (result.status == StatusEnum.CartNotFound)
                 return NotFound("The cart is empty");
             

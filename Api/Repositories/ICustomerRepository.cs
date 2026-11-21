@@ -8,5 +8,6 @@ namespace Api.Repositories
     {
         Task<Customer?> GetCustomerDetailsById(Guid customerId);
         Task<IEnumerable<Customer>> GetCustomersDetails();
+        Task<Customer?> GetCustomerDetailsByEmail(string email);
     }
 }
